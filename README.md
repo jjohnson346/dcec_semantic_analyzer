@@ -7,12 +7,13 @@ Acknowledgements are owed to Patrick Blackburn and Johan Ros whose textbook, Rep
 
 ## Instructions
 
-1.  Navigate to the directory where this system was downloaded.
-2.  If you do not already have swi-prolog installed, download prolog from here: http://www.swi-prolog.org/ and install on your workstation.
-2.  Start swi-prolog by inputting the following at the bash prompt: $swipl\<Enter\>  
-3.  At the prolog prompt, input the folloiwng to load the knowledge base for the system:  ?- [lambda_dcec].
-4.  Follow the instructions as listed in the menu.
-5.  Some example sentences are given below.  However, please use all lower case when inputting the names (unlike what is shown, below).
+1.  If you do not already have swi-prolog installed on your workstation, download prolog from here: http://www.swi-prolog.org/ and install it.
+2.  Download this repository to your workstation.
+3.  Navigate to the directory where this system was downloaded.
+4.  Start swi-prolog by inputting the following at the bash prompt: $swipl\<Enter\>  
+5.  At the prolog prompt, input the folloiwng to load the knowledge base for the system:  ?- [lambda_dcec].
+6.  Follow the instructions as listed in the menu.
+7.  Some example sentences are given below.  However, please use all lower case when inputting the names (unlike what is shown, below).
 
 ## Sample sentences
 
