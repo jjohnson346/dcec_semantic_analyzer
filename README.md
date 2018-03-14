@@ -38,3 +38,19 @@ DCEC representation:  K(vincent,K(billy,happens(action(vincent,sell(car)),tomorr
 
 DCEC representation:  B(vincent,some(X,and(car(X),happens(action(billy,sell(X)),tomorrow))))
 
+## The semantic representations of non-proper nouns preceded by indefinite articles vs. those preceded by definite articles
+
+As a follow up to my email yesterday re: the example sentences, I want to explain just a little what's going on with the handling of the definite article, the, vs. the indefinite article, a, in these sentences:
+
+There are two semantic representations of each noun.  For example, for the noun, car, we have the semantic representation when the word, car, is used with a definite article (e.g., the (e.g., the car ...)) and one for when car is used with an indefinite article (a, every, etc., (e.g., a car ...)):
+
+noun(lam(X,car(X)) --> [car]  %% semantic representation when used with an indefinite article
+
+noun(lam(X,app(X,car))) ---> [car]  %% semantic rep when used with a definite article.
+
+Effectively, the definite article semantic representation takes the same approach as if the word car was a proper noun, referencing exactly one object int the problem domain.  So, the lambda calculus expression parallels that for a proper noun.
+
+For a given sentence with the word car in it, Prolog will produce two lambda calculus expressions, then, one for each semantic representation of the word car.  However, depending on the whether the original sentence uses a definite article or indef. article with that word, one of those lambda calculus expressions will not successfully translate to a wff in the DCEC.  The prolog code has been modified to detect which one is not well-formed, and throws that one out, leaving only the other (good) one.  This is a procedural solution to a theoretical problem, but it appears to work.  
+
+On the down side, this means that non-proper nouns are represented 2 times in the lexicon.  But one could argue there will be many words that have multiple "meanings"/semantics, so this idea should not be a big deal when scaled to a large lexicon. Also, from a computational perspective, it means 2x the number of lambda calculus expressions are generated for each non-proper noun in the sentence.  Thus, the computation of the lambda calculus expression is exponential in the number of nouns in the sentence, but most of the time there are no more than 6 or 7 nouns in a sentence. So from a practical perspective, this shouldn't be prohibitive - 2^6, 2^7.
+
