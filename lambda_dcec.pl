@@ -176,6 +176,26 @@ lv --> [is].
 %% therefore, semantic representation of verb is often
 %% expressed in terms of the event calculus.
 
+%% making sense of all the lambdas/apps in these transitive verb semantic representations:
+%% consider the following example expression
+%% as it relates to the semantic representation of the word, places (the trans. verb):
+%%
+%%       in the beginning bob places the cookie in the cabinet.
+%%
+%% Those sentence elements coming after the word, places, must have a lam/variable expression
+%% at the beginning of the semantic representation with a subsequent substitution
+%% in an app/variable(lam/new variable complex) expression down the line in the
+%% representation.  For example, the noun phrase, the cookie, succeeds 
+%% the verb, places, in the sentence. The semantic representation for "the cookie"
+%% is mapped to the lam(X,_) variable, where X appears in the following expression
+%% with app(X,lam(Z,_).  This has the effect of placing
+%% the sem. rep. for "the cookie" precisely in the position occupied by variable, Z.
+%% Likewise, "in the cabinet"'s semantic representation is mapped to the lam(M,_)
+%% expression, where there is an app(M,lam(N,_) expression therein.  This effectively places
+%% the semantic representation for "in the cabinet" where the variable N is located.
+%% On the other hand, for the noun phrase, bob, which *precedes* the verb, places, 
+%% that element is mapped to the lam(Y,_) expression and is substituted for the variable, Y.
+
 tv(lam(X,lam(M,lam(Y,lam(W,app(M,lam(N,app(X,lam(Z,happens(action(Y,places(Z,N)),W)))))))))) --> [places].
 tv(lam(X,lam(P,lam(Y,app(P,lam(W,app(X,lam(Z,happens(action(Y,pay(Z),W)))))))))) --> [paid].
 tv(lam(X,lam(P,lam(Y,app(P,lam(W,app(X,lam(Z,happens(action(Y,sell(Z)),W))))))))) --> [will,sell].
@@ -211,6 +231,11 @@ iart(lam(U,lam(V,all(X,imp(app(U,X),app(V,X)))))) --> [every].
 iart(lam(U,lam(V,some(X,and(app(U,X),app(V,X)))))) --> [a].
 
 %% definite articles
+%% notice that there is no semantic representation for the definite article.
+%% This is due to the fact that when the definite article is combined with
+%% a noun to form a noun phrase, the noun phrase's semantic representation
+%% should simply be that of the noun, itself, (with no contribution from
+%% the definite article).  See the np --> dart, noun rule, above.
 dart --> [the].
 
 

@@ -38,19 +38,31 @@ DCEC representation:  K(vincent,K(billy,happens(action(vincent,sell(car)),tomorr
 
 DCEC representation:  B(vincent,some(X,and(car(X),happens(action(billy,sell(X)),tomorrow))))
 
-## The semantic representations of non-proper nouns preceded by indefinite articles vs. those preceded by definite articles
-
-As a follow up to my email yesterday re: the example sentences, I want to explain just a little what's going on with the handling of the definite article, the, vs. the indefinite article, a, in these sentences:
+## Semantic representations of non-proper nouns
 
 There are two semantic representations of each noun.  For example, for the noun, car, we have the semantic representation when the word, car, is used with a definite article (e.g., the (e.g., the car ...)) and one for when car is used with an indefinite article (a, every, etc., (e.g., a car ...)):
 
-noun(lam(X,car(X)) --> [car]  %% semantic representation when used with an indefinite article
+noun(lam(X,car(X)) --> [car]        %% semantic representation when used with an indefinite article
 
-noun(lam(X,app(X,car))) ---> [car]  %% semantic rep when used with a definite article.
+noun(lam(X,app(X,car))) ---> [car]       %% semantic rep when used with a definite article.
 
-Effectively, the definite article semantic representation takes the same approach as if the word car was a proper noun, referencing exactly one object int the problem domain.  So, the lambda calculus expression parallels that for a proper noun.
+Effectively, the definite-article-semantic-representation takes the same approach as if the word car was a proper noun, referencing exactly one object int the problem domain.  So, the lambda calculus expression parallels that for a proper noun.
 
-For a given sentence with the word car in it, Prolog will produce two lambda calculus expressions, then, one for each semantic representation of the word car.  However, depending on the whether the original sentence uses a definite article or indef. article with that word, one of those lambda calculus expressions will not successfully translate to a wff in the DCEC.  The prolog code has been modified to detect which one is not well-formed, and throws that one out, leaving only the other (good) one.  This is a procedural solution to a theoretical problem, but it appears to work.  
+For a given sentence with the word car in it, then, Prolog will produce two lambda calculus expressions - one for each semantic representation of the word car.  However, depending on whether the original sentence uses a definite article or indefinite article with that word, one of those lambda calculus expressions will not successfully translate to a well-formed formula (wff) in the DCEC.  The Prolog code has been modified to detect which one is not well-formed, and throws that one out, leaving only the other (good) one.  This is a procedural solution to a theoretical problem, but it appears to work.  
 
-On the down side, this means that non-proper nouns are represented 2 times in the lexicon.  But one could argue there will be many words that have multiple "meanings"/semantics, so this idea should not be a big deal when scaled to a large lexicon. Also, from a computational perspective, it means 2x the number of lambda calculus expressions are generated for each non-proper noun in the sentence.  Thus, the computation of the lambda calculus expression is exponential in the number of nouns in the sentence, but most of the time there are no more than 6 or 7 nouns in a sentence. So from a practical perspective, this shouldn't be prohibitive - 2^6, 2^7.
+On the down side, this means that each non-proper noun has two representations in the lexicon.  But one could argue there will be many words that have multiple "meanings", (and thus, semantic representations), and so we should get used to this idea.  Also, however, from a computational perspective, it means 2x the number of lambda calculus expressions are generated for each occurrence of a  non-proper noun in the sentence.  Thus, the computation of the lambda calculus expression is exponential in the number of nouns in the sentence, but most of the time there are no more than 6 or 7 nouns in a sentence. So from a practical perspective, this shouldn't be prohibitive.
+
+## Treatment of transitive verbs
+
+Consider the semantic representation for the verb, places:
+
+tv(lam(X,lam(M,lam(Y,lam(W,app(M,lam(N,app(X,lam(Z,happens(action(Y,places(Z,N)),W)))))))))) --> [places].
+
+Next, consider the following example expression as it relates to the semantic representation of the word, places (the trans. verb):
+
+       In the beginning, Bob places the cookie in the cabinet.
+       
+Those sentence elements coming after the word, "places", must have a lam/variable expression at the beginning of the semantic representation with a subsequent substitution in an app/variable(lam/new variable complex) expression down the line in the representation.  For example, the noun phrase, "the cookie", succeeds the verb, places, in the sentence. The semantic representation for "the cookie" is mapped to the lam(X,\_) variable, where X appears in the following expression with app(X,lam(Z,\_).  This has the effect of placing the semantic representation for "the cookie" in place of the variable, Z.  Likewise, for the phrase, "in the cabinet", its semantic representation is mapped to the lam(M,\_) expression, where there is an app(M,lam(N,\_) expression therein.  This effectively places the semantic representation for "in the cabinet" in place of the variable, N.
+
+On the other hand, for the noun phrase, bob, which \*precedes\* the verb, places, that element is mapped to the lam(Y,\_) expression and is substituted for the variable, Y.
 
