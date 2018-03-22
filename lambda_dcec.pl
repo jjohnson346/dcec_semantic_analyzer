@@ -92,16 +92,21 @@ t(Sentence,CEC) :-
 
 %% grammar
 
-s(app(NP,VP)) --> np(NP),vp(VP).
+s(S) --> s_simple(S).
+s(app(app(Conj,S1),S2)) --> s_simple(S1),conj(Conj),s(S2).
+
+s_simple(app(NP,VP)) --> np(NP),vp(VP).
 
 %% sentence with intro temporal phrase. (e.g., in the beginning, mia walked home.)
-s(app(TP,S)) --> tp(TP),s(S).
+s_simple(app(TP,S)) --> tp(TP),s(S).
 
 %% epistemic/doxastic operators - knows, believes, sees
-s(app(NP,EP)) --> np(NP),ep(EP).
+s_simple(app(NP,EP)) --> np(NP),ep(EP).
 
 %% epistemic operator - common knowledge
-s(app(CKEPOP,S)) --> ckepop(CKEPOP),s(S).
+s_simple(app(CKEPOP,S)) --> ckepop(CKEPOP),s(S).
+
+%%
 
 np(PN) --> pn(PN).                           % proper noun
 np(app(IART,Noun)) --> iart(IART),noun(Noun).   % determiner + noun 
@@ -137,10 +142,13 @@ ep(app(EPOP,lam(C,app(C,S)))) --> epop(EPOP),s(S).
 noun(lam(X,woman(X))) --> [woman].
 noun(lam(X,man(X))) --> [man].
 noun(lam(X,ball(X))) --> [ball].
+noun(lam(X,ball(X))) --> [balls].  %% plural form for indef. art. nouns; e.g. some balls...
 noun(lam(X,car(X))) --> [car].
 
 %% non-proper nouns, used with definite article (the, this, etc.)
 noun(lam(X,app(X,ball))) --> [ball].
+noun(lam(X,app(X,balls))) --> [balls].  %% plural form of def. art. nouns; e.g., those balls
+noun(lam(X,app(X,man))) --> [man].
 noun(lam(X,app(X,cookie))) --> [cookie].
 noun(lam(X,app(X,cabinet))) --> [cabinet].
 noun(lam(X,app(X,rent))) --> [rent].
@@ -171,7 +179,7 @@ iv(lam(X,dance(X))) --> [dances].
 
 %% linking verbs
 lv --> [is].
-
+lv --> [are].
 %% transitive verbs - actions are treated as events.
 %% therefore, semantic representation of verb is often
 %% expressed in terms of the event calculus.
@@ -229,6 +237,7 @@ ckepop(lam(X,'C'(X))) --> [everyone,knows,that].
 %% indefinite articles
 iart(lam(U,lam(V,all(X,imp(app(U,X),app(V,X)))))) --> [every].
 iart(lam(U,lam(V,some(X,and(app(U,X),app(V,X)))))) --> [a].
+iart(lam(U,lam(V,some(X,and(app(U,X),app(V,X)))))) --> [some].
 
 %% definite articles
 %% notice that there is no semantic representation for the definite article.
@@ -238,6 +247,8 @@ iart(lam(U,lam(V,some(X,and(app(U,X),app(V,X)))))) --> [a].
 %% the definite article).  See the np --> dart, noun rule, above.
 dart --> [the].
 
+%% conjunction
+conj(lam(U,lam(V,and(U,V)))) --> [and].
 
 
 
