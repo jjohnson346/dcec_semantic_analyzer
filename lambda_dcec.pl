@@ -48,6 +48,11 @@
 :- use_module(readLine,[readLine/1]).
 :- use_module(comsemPredicates,[printRepresentations/1]).
 
+% display info at start.
+:- info.
+
+
+
 lambdaDCEC:-
 	readLine(Sentence),
         lambdaDCEC(Sentence,DCECs),
@@ -90,10 +95,17 @@ t(Sentence,CEC) :-
     betaConvert(Sem,CEC),
     numbervars(CEC,23,_).
 
-%% grammar
+
+%% ***************************************************************************************
+%% **************************************** GRAMMAR **************************************
+%% ***************************************************************************************
+
+%% *************************************** SENTENCES *************************************
 
 s(S) --> s_simple(S).
 s(app(app(Conj,S1),S2)) --> s_simple(S1),conj(Conj),s(S2).
+%% conditional
+s(app(app(Cond,S1),S2)) --> cond(Cond),s(S1),cons,s(S2).
 
 s_simple(app(NP,VP)) --> np(NP),vp(VP).
 
@@ -106,11 +118,19 @@ s_simple(app(NP,EP)) --> np(NP),ep(EP).
 %% epistemic operator - common knowledge
 s_simple(app(CKEPOP,S)) --> ckepop(CKEPOP),s(S).
 
-%%
 
-np(PN) --> pn(PN).                           % proper noun
-np(app(IART,Noun)) --> iart(IART),noun(Noun).   % determiner + noun 
-np(Noun) --> dart,noun(Noun).
+%% ************************************* NOUN PHRASES *************************************
+
+%% noun phrases - includes support for conjunctions.
+np(NP) --> np_simple(NP).
+np(app(app(Conj,NP1),NP2)) --> np_simple(NP1),conj(Conj),np(NP2).
+
+np_simple(PN) --> pn(PN).                           % proper noun
+np_simple(app(IART,Noun)) --> iart(IART),noun(Noun).   % determiner + noun 
+np_simple(Noun) --> dart,noun(Noun).
+
+
+%% ************************************* VERB PHRASES *************************************
 
 vp(IV) --> iv(IV).
 vp(app(TV,NP)) --> tv(TV),np(NP).
@@ -119,6 +139,9 @@ vp(app(app(TV,NP1),TP)) --> tv(TV),np(NP1),tp(TP).
 vp(ADJ) --> lv,adj(ADJ).
 %% to do: convert dtv's to handle events.
 %%vp(app(app(DTV,NP1),NP2)) --> dtv(DTV),np(NP1),np(NP2).
+
+
+%% ************************************* OTHER PHRASES *************************************
 
 pp(NP) --> prep,np(NP).
 
@@ -130,13 +153,32 @@ tp(TN) --> tn(TN).
 %% those beginning with knows, believes,
 %% sees, etc.
 %% note:  for justification for this combination
-%% scheme for epop and s, see notes dated
+%% scheme for epop and s, see notes in notebook dated
 %% 02/13/2018 re: example - julia believes mia walks.
 ep(app(EPOP,lam(C,app(C,S)))) --> epop(EPOP),s(S). 
 
 
+%% ***************************************************************************************
+%% ******************************* LEXICON ***********************************************
+%% ***************************************************************************************
 
-%% lexicon
+
+%% ********************* EPISTEMIC/DOXASTIC OPERATORS ************************************
+
+epop(lam(X,lam(Y,app(X,lam(Z,'K'(Y,Z)))))) --> [knows].
+epop(lam(X,lam(Y,app(X,lam(Z,'K'(Y,Z)))))) --> [knows,that].
+epop(lam(X,lam(Y,app(X,lam(Z,'B'(Y,Z)))))) --> [believes].
+epop(lam(X,lam(Y,app(X,lam(Z,'B'(Y,Z)))))) --> [believes,that].
+epop(lam(X,lam(Y,app(X,lam(Z,'S'(Y,Z)))))) --> [sees].
+epop(lam(X,lam(Y,app(X,lam(Z,'S'(Y,Z)))))) --> [sees,that].
+
+%% common knowledge
+ckepop(lam(X,'C'(X))) --> [it,is,common,knowledge,that].
+ckepop(lam(X,'C'(X))) --> [everyone,knows].
+ckepop(lam(X,'C'(X))) --> [everyone,knows,that].
+
+
+%% ******************************* NOUNS *************************************************
 
 %% non-proper nouns, used with indefinite article (a, every)
 noun(lam(X,woman(X))) --> [woman].
@@ -170,16 +212,23 @@ pn(lam(X,app(X,julia))) --> [julia].
 pn(lam(X,app(X,bob))) --> [bob].
 pn(lam(X,app(X,alice))) --> [alice].
 
-%% adjectives
-adj(lam(X,red(X))) --> [red].
+
+%% exercise 2.4.5 - extend the dcg for "everyone dances",
+%% "someone snorts".
+pronoun(lam(V,all(X,imp(person(X),app(V,X))))) --> [everyone].
+pronoun(lam(V,some(X,and(person(X),app(V,X))))) --> [someone].
+
+
+%% ******************************* VERBS *************************************************
 
 %% intransitive verbs
 iv(lam(X,walk(X))) --> [walks].
-iv(lam(X,dance(X))) --> [dances].
+iv(lam(X,walk(X))) --> [walk].
 
-%% linking verbs
-lv --> [is].
-lv --> [are].
+iv(lam(X,dance(X))) --> [dances].
+iv(lam(X,dance(X))) --> [dance].
+
+
 %% transitive verbs - actions are treated as events.
 %% therefore, semantic representation of verb is often
 %% expressed in terms of the event calculus.
@@ -190,23 +239,27 @@ lv --> [are].
 %%
 %%       in the beginning bob places the cookie in the cabinet.
 %%
-%% Those sentence elements coming after the word, places, must have a lam/variable expression
-%% at the beginning of the semantic representation with a subsequent substitution
-%% in an app/variable(lam/new variable complex) expression down the line in the
-%% representation.  For example, the noun phrase, the cookie, succeeds 
+%% Those sentence elements coming after the word, places, must have a
+%% lam/variable expression at the beginning of the semantic representation
+%% with a subsequent substitution in an app/variable(lam/new variable complex)
+%% expression down the line in the representation.
+%%
+%% For example, the noun phrase, the cookie, succeeds 
 %% the verb, places, in the sentence. The semantic representation for "the cookie"
 %% is mapped to the lam(X,_) variable, where X appears in the following expression
 %% with app(X,lam(Z,_).  This has the effect of placing
 %% the sem. rep. for "the cookie" precisely in the position occupied by variable, Z.
 %% Likewise, "in the cabinet"'s semantic representation is mapped to the lam(M,_)
-%% expression, where there is an app(M,lam(N,_) expression therein.  This effectively places
-%% the semantic representation for "in the cabinet" where the variable N is located.
-%% On the other hand, for the noun phrase, bob, which *precedes* the verb, places, 
-%% that element is mapped to the lam(Y,_) expression and is substituted for the variable, Y.
+%% expression, where there is an app(M,lam(N,_) expression therein.
+%% This effectively places the semantic representation for "in the cabinet"
+%% where the variable N is located. On the other hand, for the noun phrase,
+%% bob, which *precedes* the verb, places, that element is mapped to the
+%% lam(Y,_) expression and is substituted for the variable, Y.
 
 tv(lam(X,lam(M,lam(Y,lam(W,app(M,lam(N,app(X,lam(Z,happens(action(Y,places(Z,N)),W)))))))))) --> [places].
 tv(lam(X,lam(P,lam(Y,app(P,lam(W,app(X,lam(Z,happens(action(Y,pay(Z),W)))))))))) --> [paid].
 tv(lam(X,lam(P,lam(Y,app(P,lam(W,app(X,lam(Z,happens(action(Y,sell(Z)),W))))))))) --> [will,sell].
+
 %% to do: convert the loves semantic representation to handle event syntax.
 %% tv(lam(X,lam(Y,app(X,lam(Z,love(Y,Z)))))) --> [loves].
 
@@ -215,31 +268,30 @@ tv(lam(X,lam(P,lam(Y,app(P,lam(W,app(X,lam(Z,happens(action(Y,sell(Z)),W))))))))
 %% dtv(lam(X,lam(M,lam(Y,app(M,lam(N,app(X,lam(Z,offer(Y,N,Z))))))))) --> [offers].
 %% dtv(lam(X,lam(M,lam(Y,app(M,lam(N,app(X,lam(Z,throw(Y,N,Z))))))))) --> [throws].
 
-%% prep(in) --> [in].
+%% linking verbs
+lv --> [is].
+lv --> [are].
+
+
+%% *************************************** ADJECTIVES ************************************
+
+%% adjectives
+adj(lam(X,red(X))) --> [red].
+
+
+%% ************************************** PREPOSITIONS ***********************************
+
 prep --> [in].
 
-%% epistemic operators
-%% support the dcec.
-epop(lam(X,lam(Y,app(X,lam(Z,'K'(Y,Z)))))) --> [knows].
-epop(lam(X,lam(Y,app(X,lam(Z,'K'(Y,Z)))))) --> [knows,that].
-epop(lam(X,lam(Y,app(X,lam(Z,'B'(Y,Z)))))) --> [believes].
-epop(lam(X,lam(Y,app(X,lam(Z,'B'(Y,Z)))))) --> [believes,that].
-epop(lam(X,lam(Y,app(X,lam(Z,'S'(Y,Z)))))) --> [sees].
-epop(lam(X,lam(Y,app(X,lam(Z,'S'(Y,Z)))))) --> [sees,that].
+%% **************************************** ARTICLES *************************************
 
-%% epistemic operator
-%% common knowledge
-ckepop(lam(X,'C'(X))) --> [it,is,common,knowledge,that].
-ckepop(lam(X,'C'(X))) --> [everyone,knows].
-ckepop(lam(X,'C'(X))) --> [everyone,knows,that].
-
-%% determiners
 %% indefinite articles
 iart(lam(U,lam(V,all(X,imp(app(U,X),app(V,X)))))) --> [every].
 iart(lam(U,lam(V,some(X,and(app(U,X),app(V,X)))))) --> [a].
 iart(lam(U,lam(V,some(X,and(app(U,X),app(V,X)))))) --> [some].
 
 %% definite articles
+%%
 %% notice that there is no semantic representation for the definite article.
 %% This is due to the fact that when the definite article is combined with
 %% a noun to form a noun phrase, the noun phrase's semantic representation
@@ -247,14 +299,45 @@ iart(lam(U,lam(V,some(X,and(app(U,X),app(V,X)))))) --> [some].
 %% the definite article).  See the np --> dart, noun rule, above.
 dart --> [the].
 
-%% conjunction
+
+%% ********************* NATURAL LANGUAGE CONJUNCTIONS ************************************
+
+%% and/or - there are two semantic representations for the conjunctions, and/or
+%%
+%% First, we have one for dealing with the situation in which and is
+%% used as a conjunction between 2 phrases that themselves are sentences,
+%% such as "mia dances and vincent walks".
+%%
+%% Second, we have a semantic representation when and/or is used in a natural
+%% language expression to refer to two noun phrases, applied to a single
+%% verb phrase, such as in the following:
+%% "mia and vincent dance".
+%%
+%% and/or - semantic representation 1:  e.g., mia dances and vincent walks.
 conj(lam(U,lam(V,and(U,V)))) --> [and].
+conj(lam(U,lam(V,or(U,V)))) --> [or].
+
+%% and/or - semantic representation 2:  e.g., mia and vincent dance.
+conj(lam(U,lam(V,lam(X,and(app(U,X),app(V,X)))))) --> [and].
+conj(lam(U,lam(V,lam(X,or(app(U,X),app(V,X)))))) --> [or].
+
+conj(lam(U,lam(V,but(U,V)))) --> [but].
+
+
+%% ********************************** NATURAL LANGUAGE IF/THEN ***************************
+
+cond(lam(U,lam(V,imp(U,V)))) --> [if].
+cons --> [then].
+
+
+%% ***************************************** NEGATION ************************************
+
+%% exercise 2.4.4 - rule for the determiner, no. 
+det(lam(U,lam(V,not(some(X,and(app(U,X),app(V,X))))))) --> [no].
 
 
 
-/*========================================================================
-   Info
-========================================================================*/
+%% ******************************************* INFO **************************************
 
 info:-
    format('~n> ------------------------------------------------------------------ <',[]),
@@ -276,8 +359,3 @@ info:-
    format('~n~n',[]).
 
 
-/*========================================================================
-   Display info at start
-========================================================================*/
-
-:- info.
