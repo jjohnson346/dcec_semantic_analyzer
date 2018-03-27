@@ -66,3 +66,58 @@ Those sentence elements coming after the word, "places", must have a lam/variabl
 
 On the other hand, for the noun phrase, bob, which \*precedes\* the verb, places, that element is mapped to the lam(Y,\_) expression and is substituted for the variable, Y.
 
+## Treatment of conjunctions and logical operators
+
+### Conjunction:
+
+There are a number of ways a conjunction, such as and, might be used - but the two cases I've dealt with so far are the 'logical' and - (where we have a construction consisting of 'sentence 1 + and + sentence 2'), and then where we have a form of natural language and - 'noun phrase 1 + and + noun phrase 2', as we commonly see in english.
+
+First, the logical and:
+
+Example a:  Billy believes mia walks and vincent knows johnny dances.
+
+![](images/conjunction_a.png)
+
+
+Notice that there are 2 semantic representations here as the precise meaning of this sentence is ambiguous.  This highlights the need we'll have to assign probabilities to different representations based on prior experience, etc.
+
+
+Next the noun phrase 1 + and + noun phrase 2
+
+Example b:  mia knows julia and vincent dance.
+
+![](images/conjunction_b.png)
+
+### Disjunction: (same idea as conjunction)
+
+Example a:  vincent knows that mia dances or vincent walks.
+
+![](images/disjunction_a.png)
+
+Example b:  mia knows vincent or julia walk.
+
+![](images/disjunction_b.png)
+
+### Conditional:
+
+Example a:  mia knows that if the ball bounces then the ball is red.
+
+![](images/conditional_a.png)
+
+Example b:  julia knows that if mia paid the rent yesterday then the landlord will be happy.
+
+![](images/conditional_b.png)
+
+
+
+### Negation:  
+
+This is a large topic since there are so many ways to express a negative in English.  We start with the word 'no':
+
+
+Example:  the landlord knows that no woman paid the rent yesterday.
+
+![](images/negation_a.png)
+
+
+

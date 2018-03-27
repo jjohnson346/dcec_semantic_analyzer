@@ -48,9 +48,6 @@
 :- use_module(readLine,[readLine/1]).
 :- use_module(comsemPredicates,[printRepresentations/1]).
 
-% display info at start.
-:- info.
-
 
 
 lambdaDCEC:-
@@ -125,10 +122,11 @@ s_simple(app(CKEPOP,S)) --> ckepop(CKEPOP),s(S).
 np(NP) --> np_simple(NP).
 np(app(app(Conj,NP1),NP2)) --> np_simple(NP1),conj(Conj),np(NP2).
 
-np_simple(PN) --> pn(PN).                           % proper noun
-np_simple(app(IART,Noun)) --> iart(IART),noun(Noun).   % determiner + noun 
-np_simple(Noun) --> dart,noun(Noun).
-
+np_simple(PN) --> pn(PN).                              % proper noun
+np_simple(app(IART,Noun)) --> iart(IART),noun(Noun).   % indef art + noun 
+np_simple(Noun) --> dart,noun(Noun).                   % definite article + noun
+np_simple(Pronoun) --> pronoun(Pronoun).               % pronoun
+np_simple(app(Neg,Noun)) --> neg(Neg),noun(Noun).      % negative + noun (e.g., no woman...)
 
 %% ************************************* VERB PHRASES *************************************
 
@@ -186,6 +184,8 @@ noun(lam(X,man(X))) --> [man].
 noun(lam(X,ball(X))) --> [ball].
 noun(lam(X,ball(X))) --> [balls].  %% plural form for indef. art. nouns; e.g. some balls...
 noun(lam(X,car(X))) --> [car].
+noun(lam(X,car(X))) --> [cars].
+noun(lam(X,landlord(X))) --> [landlord].
 
 %% non-proper nouns, used with definite article (the, this, etc.)
 noun(lam(X,app(X,ball))) --> [ball].
@@ -195,6 +195,7 @@ noun(lam(X,app(X,cookie))) --> [cookie].
 noun(lam(X,app(X,cabinet))) --> [cabinet].
 noun(lam(X,app(X,rent))) --> [rent].
 noun(lam(X,app(X,car))) --> [car].
+noun(lam(X,app(X,landlord))) --> [landlord].
 
 %% time nouns, used with definite article (the, this, etc.)
 tn(lam(X,app(X,beginning))) --> [beginning].
@@ -212,7 +213,6 @@ pn(lam(X,app(X,julia))) --> [julia].
 pn(lam(X,app(X,bob))) --> [bob].
 pn(lam(X,app(X,alice))) --> [alice].
 
-
 %% exercise 2.4.5 - extend the dcg for "everyone dances",
 %% "someone snorts".
 pronoun(lam(V,all(X,imp(person(X),app(V,X))))) --> [everyone].
@@ -227,6 +227,9 @@ iv(lam(X,walk(X))) --> [walk].
 
 iv(lam(X,dance(X))) --> [dances].
 iv(lam(X,dance(X))) --> [dance].
+
+iv(lam(X,dance(X))) --> [bounces].
+iv(lam(X,dance(X))) --> [bounce].
 
 
 %% transitive verbs - actions are treated as events.
@@ -271,12 +274,14 @@ tv(lam(X,lam(P,lam(Y,app(P,lam(W,app(X,lam(Z,happens(action(Y,sell(Z)),W))))))))
 %% linking verbs
 lv --> [is].
 lv --> [are].
+lv --> [will,be].
 
 
 %% *************************************** ADJECTIVES ************************************
 
 %% adjectives
 adj(lam(X,red(X))) --> [red].
+adj(lam(X,happy(X))) --> [happy].
 
 
 %% ************************************** PREPOSITIONS ***********************************
@@ -333,7 +338,7 @@ cons --> [then].
 %% ***************************************** NEGATION ************************************
 
 %% exercise 2.4.4 - rule for the determiner, no. 
-det(lam(U,lam(V,not(some(X,and(app(U,X),app(V,X))))))) --> [no].
+neg(lam(U,lam(V,not(some(X,and(app(U,X),app(V,X))))))) --> [no].
 
 
 
@@ -358,4 +363,7 @@ info:-
    format('~n> ------------------------------------------------------------------ <',[]),
    format('~n~n',[]).
 
+
+% display info at start.
+:- info.
 
